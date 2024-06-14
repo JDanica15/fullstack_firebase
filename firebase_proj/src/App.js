@@ -1,6 +1,5 @@
-import logo from './logo.svg';
 import './App.scss';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import Layout from './containers/Layout';
 

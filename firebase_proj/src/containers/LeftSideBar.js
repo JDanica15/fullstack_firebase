@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, Routes, Link, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import routes from "../routes/sidebar";
 import XMarkIcon from "@heroicons/react/24/outline/XMarkIcon";
 import SidebarSubmenu from "./SidebarSideMenu";
@@ -14,7 +14,7 @@ const LeftSideBar = () => {
   return (
     <div className="drawer-side  z-30">
       <label htmlFor="left-sidebar-drawer" className="drawer-overlay"></label>
-      <ul className="menu  pt-2 w-80 bg-base-100 min-h-full   text-base-content">
+      <ul className="menu  pt-2 w-80 bg-base-100 min-h-full text-base-content">
         <button
           className="btn btn-ghost bg-base-300  btn-circle z-50 top-0 right-0 mt-4 mr-2 absolute lg:hidden"
           onClick={() => close()}
@@ -23,7 +23,7 @@ const LeftSideBar = () => {
         </button>
 
         <li className="mb-2 font-semibold text-xl">
-          <Link to={'/app/welcome'}>Menu Portal</Link>
+          <Link to={'/app/dashboard'}>Menu Portal</Link>
         </li>
         {routes.map((route, k) => {
           return (

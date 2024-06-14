@@ -1,12 +1,11 @@
 import React, { Fragment, useState } from "react";
-import app from "../../config/firestore";
 import { createItem } from "../../config/utils/FireStoreServices";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Create = () => {
     const navigate = useNavigate();
 
-    const [loading, setLoading] = useState(false);
     const [showOption, setShowOption] = useState(false);
     const [newItem, setNewItem] = useState({
         name: "",
@@ -21,11 +20,16 @@ const Create = () => {
     // VALIDATE DATA IF FIELD IS EMPTY
     const validateForm = () => {
         const newErrors = {};
-        if (!newItem.name) newErrors.category = 'Category is required';
-        if (!newItem.category) newErrors.name = 'Name is required';
-        if (!newItem.price) newErrors.price = 'Price is required';
-        if (!newItem.cost) newErrors.cost = 'Cost is required';
-        if (!newItem.quantity) newErrors.quantity = 'Stock is required';
+        if (!newItem.name) newErrors.name = `Name is required ${toast.error('Name is required')}`;
+        if (!newItem.category) newErrors.category = `Category is required ${toast.error('Category is required')}`;
+        if (!newItem.price) newErrors.price = `Price is required ${toast.error('Price is required')}`;
+        if (!newItem.cost) newErrors.cost = `Cost is required ${toast.error('Cost is required')}`;
+        if (!newItem.quantity) newErrors.quantity = `Stock is required ${toast.error('Stock is required')}`;
+
+        // CHECK PRICE COST QUANTITY
+        if (!/^\d*\.?\d*$/.test(newItem.price)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
+        if (!/^\d*\.?\d*$/.test(newItem.cost)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
+        if (!/^\d*\.?\d*$/.test(newItem.quantity)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
         return newErrors;
     };
 
@@ -34,9 +38,18 @@ const Create = () => {
             const validationErrors = validateForm();
             if (Object.keys(validationErrors).length > 0) {
                 setErrors(validationErrors);
+                toast.error('Please fill in all required fields.');
             } else {
-                await createItem(newItem);
-                alert('data created');
+                const parseItem = {
+                    name: newItem.name,
+                    category: newItem.category,
+                    price: parseFloat(newItem.price),
+                    cost: parseFloat(newItem.cost),
+                    quantity: parseFloat(newItem.quantity),
+                    option: newItem.option
+                }
+                await createItem(parseItem);
+                toast.success('Data has been saved thanks!')
                 navigate("/app/menu");
             }
         } catch (error) {
@@ -59,10 +72,10 @@ const Create = () => {
 
     // FOR ERROR IF FIELD IS EMPTY
     const getFieldClass = (fieldName) => {
-        return errors[fieldName] ?  
-        'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600' 
-        : 
-        'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
+        return errors[fieldName] ?
+            'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600'
+            :
+            'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
     };
 
     return (
@@ -110,7 +123,7 @@ const Create = () => {
                     </label>
                     {showOption ? (
                         <input
-                            className="mb-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            className="mb-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             type="text"
                             name="option"
                             value={newItem.option}
@@ -135,8 +148,8 @@ const Create = () => {
                         Price
                     </label>
                     <input
-                        className={`${getFieldClass('price')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-                        type="number"
+                        className={`${getFieldClass('price')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
+                        type="text"
                         name="price"
                         placeholder="Price"
                         value={newItem.price}
@@ -152,8 +165,8 @@ const Create = () => {
                         Stock
                     </label>
                     <input
-                        className={`${getFieldClass('quantity')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-                        type="number"
+                        className={`${getFieldClass('quantity')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
+                        type="text"
                         name="quantity"
                         placeholder="Stock"
                         value={newItem.quantity}
@@ -169,8 +182,8 @@ const Create = () => {
                         Cost
                     </label>
                     <input
-                        className={`${getFieldClass('cost')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-                        type="number"
+                        className={`${getFieldClass('cost')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
+                        type="text"
                         name="cost"
                         placeholder="Cost"
                         value={newItem.cost}
