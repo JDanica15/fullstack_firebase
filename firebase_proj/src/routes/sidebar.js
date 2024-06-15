@@ -1,7 +1,8 @@
 /** Icons are imported separatly to reduce build time */
 import Squares2X2Icon from "@heroicons/react/24/outline/Squares2X2Icon";
 import DocumentIcon from "@heroicons/react/24/outline/DocumentIcon";
-import UsersIcon from "@heroicons/react/24/outline/UsersIcon";
+import TableCellsIcon from "@heroicons/react/24/outline/TableCellsIcon";
+import BookOpenIcon from "@heroicons/react/24/outline/BookOpenIcon";
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
@@ -14,18 +15,18 @@ const routes = [
   },
 
   {
-    path: "/app/menu",
+    path: "", //no url if submenu exists
     icon: <DocumentIcon className={`${iconClasses} inline` } />,
     name: "Menu",
     submenu: [
       {
-        path: 'menu/create',
-        icon: <UsersIcon className={submenuIconClasses} />,
+        path: '/app/menu/create',
+        icon: <BookOpenIcon className={submenuIconClasses} />,
         name: 'Create',
       },
       {
         path: '/app/menu',
-        icon: <UsersIcon className={submenuIconClasses} />,
+        icon: <TableCellsIcon className={submenuIconClasses} />,
         name: 'View',
       }
     ]

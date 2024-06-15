@@ -2,8 +2,9 @@ import React from "react";
 
 const FormInputError = ({ fieldName, label, type, value, error, onChange, placeholder }) => {
     const getFieldClass = (fieldName) => {
-        return error ? 'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600'
-                     : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
+        return error
+            ? 'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600'
+            : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
     };
 
     return (
@@ -18,11 +19,18 @@ const FormInputError = ({ fieldName, label, type, value, error, onChange, placeh
                 className={`${getFieldClass(fieldName)} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
                 type={type}
                 name={fieldName}
+                id={fieldName}
+                aria-describedby={`${fieldName}-error`}
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
+                aria-invalid={!!error}
             />
-            {error && <p className="text-red-500 text-xs italic">{error}</p>}
+            {error && (
+                <p id={`${fieldName}-error`} className="text-red-500 text-xs italic" role="alert">
+                    {error}
+                </p>
+            )}
         </div>
     );
 };
