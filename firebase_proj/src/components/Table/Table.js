@@ -17,7 +17,7 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 	const endIndex = startIndex + itemsPerPage;
 	const displayedData = filteredData.slice(startIndex, endIndex);
 
-	//fetching data
+	// Fetching data
 	const displayData = loading
 		? [{ id: "loading", name: "Fetching data...", category: "", price: "", cost: "", stock: "", option: [] }]
 		: displayedData;
@@ -25,11 +25,15 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 	const noData = !loading && filteredData.length === 0;
 
 	// Generate options for items per page based on filteredData length then options should be [5,10,15] etc...
-
 	const options = Array.from(
 		{ length: Math.ceil(filteredData.length / 5) },
 		(_, index) => (index + 1) * 5
 	);
+
+	// Function to format currency as PHP
+	const formatCurrencyPHP = (amount) => {
+		return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
+	};
 
 	return (
 		<div className="relative">
@@ -122,10 +126,10 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 											{item.category}
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-											{item.price}
+											{formatCurrencyPHP(item.price)}
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-											{item.cost}
+											{formatCurrencyPHP(item.cost)}
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 											{item.stock}

@@ -1,5 +1,3 @@
-// components/Dashboard/Dashboard.js
-
 import React, { useEffect, useState } from "react";
 import { readItems } from "../../config/utils/FireStoreServices";
 import { ShoppingBagIcon, WalletIcon, ServerIcon } from "@heroicons/react/24/outline";
@@ -20,7 +18,6 @@ const Dashboard = () => {
 		fetchItems();
 	}, []);
 
-
 	const groupItemsByMonth = (items) => {
 		const grouped = items.reduce((acc, item) => {
 			const date = new Date(item.createdAt);
@@ -38,6 +35,11 @@ const Dashboard = () => {
 	const totalStock = menuItem.reduce((acc, item) => acc + parseFloat(item.stock), 0);
 	const overAllPrice = menuItem.reduce((acc, item) => acc + parseFloat(item.price), 0);
 	const dataCount = menuItem.length;
+
+	// Function to format currency as PHP
+	const formatCurrencyPHP = (amount) => {
+		return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
+	};
 
 	// Transform the data for the category chart
 	const categoryCount = menuItem.reduce((acc, item) => {
@@ -94,7 +96,7 @@ const Dashboard = () => {
 		<div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
 				<Card IconComponent={<ShoppingBagIcon />} total={totalStock} title="Overall Stock" />
-				<Card IconComponent={<WalletIcon />} total={overAllPrice} title="Expected Sales" />
+				<Card IconComponent={<WalletIcon />} total={formatCurrencyPHP(overAllPrice)} title="Expected Sales" />
 				<Card IconComponent={<ServerIcon />} total={dataCount} title="Total Data Count" />
 			</div>
 			<div className="grid lg:grid-cols-2 mt-4 grid-cols-1 gap-6">
