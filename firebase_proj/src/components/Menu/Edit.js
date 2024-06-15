@@ -15,7 +15,7 @@ const Edit = () => {
         category: "",
         price: "",
         cost: "",
-        quantity: "",
+        stock: "",
         option: [],
     });
 
@@ -24,6 +24,23 @@ const Edit = () => {
         toast.error(message);
         navigate("/app/menu");
     }, [navigate]);
+
+    const validateField = (fieldName, value) => {
+        switch (fieldName) {
+            case "name":
+                return value ? "" : "Name is required";
+            case "category":
+                return value ? "" : "Category is required";
+            case "price":
+                return /^\d*\.?\d*$/.test(value) ? value ? "" : "Price is required" : "Price must be a valid number";
+            case "cost":
+                return /^\d*\.?\d*$/.test(value) ? value ? "" : "Cost is required" : "Cost must be a valid number";
+            case "stock":
+                return /^\d*\.?\d*$/.test(value) ? value ? "" : "Stock is required" : "Stock must be a valid number";
+            default:
+                return "";
+        }
+    };
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -36,7 +53,7 @@ const Edit = () => {
                         category: fetchedItem.category,
                         price: fetchedItem.price.toString(),
                         cost: fetchedItem.cost.toString(),
-                        quantity: fetchedItem.quantity.toString(),
+                        stock: fetchedItem.stock.toString(),
                         option: fetchedItem.option || [],
                     });
                 } else {
@@ -56,15 +73,15 @@ const Edit = () => {
         if (!newItem.category) newErrors.category = "Category is required";
         if (!newItem.price) newErrors.price = "Price is required";
         if (!newItem.cost) newErrors.cost = "Cost is required";
-        if (!newItem.quantity) newErrors.quantity = "Stock is required";
+        if (!newItem.stock) newErrors.stock = "Stock is required";
 
-        // Validate price, cost, and quantity as numbers
+        // Validate price, cost, and stock as numbers
         if (!/^\d*\.?\d*$/.test(newItem.price))
             newErrors.price = "Price must be a valid number";
         if (!/^\d*\.?\d*$/.test(newItem.cost))
             newErrors.cost = "Cost must be a valid number";
-        if (!/^\d*\.?\d*$/.test(newItem.quantity))
-            newErrors.quantity = "Stock must be a valid number";
+        if (!/^\d*\.?\d*$/.test(newItem.stock))
+            newErrors.stock = "Stock must be a valid number";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0; // Return true if no errors
@@ -78,7 +95,7 @@ const Edit = () => {
                     category: newItem.category,
                     price: parseFloat(newItem.price),
                     cost: parseFloat(newItem.cost),
-                    quantity: parseFloat(newItem.quantity),
+                    stock: parseFloat(newItem.stock),
                     option: newItem.option.filter(opt => opt.trim() !== ""),
                 };
                 await updateItem(id, parsedItem);
@@ -105,6 +122,13 @@ const Edit = () => {
                 [name]: "",
             }));
         }
+    };
+
+    const handleBlur = (fieldName) => {
+        setErrors((prev) => ({
+            ...prev,
+            [fieldName]: validateField(fieldName, newItem[fieldName])
+        }));
     };
 
     const handleOptionChange = (index, value) => {
@@ -146,6 +170,7 @@ const Edit = () => {
                     value={newItem.category}
                     error={errors.category}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("category")}
                     placeholder="Category"
                 />
                 <FormInput
@@ -155,6 +180,7 @@ const Edit = () => {
                     value={newItem.name}
                     error={errors.name}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("name")}
                     placeholder="Name"
                 />
                 <div>
@@ -199,15 +225,17 @@ const Edit = () => {
                     value={newItem.price}
                     error={errors.price}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("price")}
                     placeholder="Price"
                 />
                 <FormInput
-                    fieldName="quantity"
+                    fieldName="stock"
                     label="Stock"
                     type="text"
-                    value={newItem.quantity}
-                    error={errors.quantity}
+                    value={newItem.stock}
+                    error={errors.stock}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("stock")}
                     placeholder="Stock"
                 />
                 <FormInput
@@ -217,6 +245,7 @@ const Edit = () => {
                     value={newItem.cost}
                     error={errors.cost}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("cost")}
                     placeholder="Cost"
                 />
             </div>

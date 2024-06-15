@@ -13,8 +13,11 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 
   // Display loading message while fetching data
   const displayData = loading
-    ? [{ id: "loading", name: "Fetching data...", category: "", price: "", cost: "", quantity: "", option: [] }]
+    ? [{ id: "loading", name: "Fetching data...", category: "", price: "", cost: "", stock: "", option: [] }]
     : filteredData;
+
+
+  const noData = !loading && filteredData.length === 0;
 
   return (
     <div className="relative">
@@ -62,32 +65,38 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
             </tr>
           </thead>
           <tbody>
-            {displayData.map((item, index) =>
-              item.id === "loading" ? (
-                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                  <td colSpan="7" className="px-6 py-4">
-                    {item.name}
-                  </td>
-                </tr>
-              ) : (
-                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                  <td className="px-6 py-4">{item.name}</td>
-                  <td className="px-6 py-4">{item.category}</td>
-                  <td className="px-6 py-4">{item.price}</td>
-                  <td className="px-6 py-4">{item.cost}</td>
-                  <td className="px-6 py-4">{item.quantity}</td>
-                  <td className="px-6 py-4">{Array.isArray(item.option) && item.option.length > 0 ? item.option.join(", ") : "None"}</td>
-                  <td className="px-6 py-4 text-left">
-                    <button className="font-medium text-blue-600 dark:text-blue-500 hover:underline m-2" onClick={() => handleEdit(item)}>
-                      Edit
-                    </button>
-                    <button className="font-medium text-red-600 dark:text-red-500 hover:underline m-2" onClick={() => handleDelete(item.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              )
-            )}
+            {noData ?
+              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <td colSpan="7" className="px-6 py-4">
+                  No data to display...
+                </td>
+              </tr> :
+              displayData.map((item, index) =>
+                item.id === "loading" ? (
+                  <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <td colSpan="7" className="px-6 py-4">
+                      {item.name}
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <td className="px-6 py-4">{item.name}</td>
+                    <td className="px-6 py-4">{item.category}</td>
+                    <td className="px-6 py-4">{item.price}</td>
+                    <td className="px-6 py-4">{item.cost}</td>
+                    <td className="px-6 py-4">{item.stock}</td>
+                    <td className="px-6 py-4">{Array.isArray(item.option) && item.option.length > 0 ? item.option.join(", ") : "None"}</td>
+                    <td className="px-6 py-4 text-left">
+                      <button className="font-medium text-blue-600 dark:text-blue-500 hover:underline m-2" onClick={() => handleEdit(item)}>
+                        Edit
+                      </button>
+                      <button className="font-medium text-red-600 dark:text-red-500 hover:underline m-2" onClick={() => handleDelete(item.id)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                )
+              )}
           </tbody>
         </table>
       </div>

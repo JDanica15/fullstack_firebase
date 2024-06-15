@@ -1,7 +1,7 @@
 import React from "react";
 
-const FormInputError = ({ fieldName, label, type, value, error, onChange, placeholder }) => {
-    const getFieldClass = (fieldName) => {
+const FormInput = ({ fieldName, label, type, value, error, onChange, onBlur, placeholder }) => {
+    const getFieldClass = () => {
         return error
             ? 'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600'
             : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
@@ -16,7 +16,7 @@ const FormInputError = ({ fieldName, label, type, value, error, onChange, placeh
                 {label}
             </label>
             <input
-                className={`${getFieldClass(fieldName)} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
+                className={`${getFieldClass()} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
                 type={type}
                 name={fieldName}
                 id={fieldName}
@@ -24,6 +24,7 @@ const FormInputError = ({ fieldName, label, type, value, error, onChange, placeh
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
+                onBlur={onBlur}
                 aria-invalid={!!error}
             />
             {error && (
@@ -35,4 +36,4 @@ const FormInputError = ({ fieldName, label, type, value, error, onChange, placeh
     );
 };
 
-export default FormInputError;
+export default FormInput;
