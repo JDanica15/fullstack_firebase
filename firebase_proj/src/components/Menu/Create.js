@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createItem } from "../../config/utils/FireStoreServices";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import FormInput from "../FormError/FormInput";
+import FormInput from "../FormInput/FormInput";
 
 const Create = () => {
     const navigate = useNavigate();

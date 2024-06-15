@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { getSpecificItem, updateItem } from "../../config/utils/FireStoreServices";
-import FormInput from "../FormError/FormInput";
+import FormInput from "../FormInput/FormInput";
 
 const Edit = () => {
     const navigate = useNavigate();
