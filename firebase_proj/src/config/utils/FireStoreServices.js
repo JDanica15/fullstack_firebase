@@ -53,7 +53,8 @@ export const createItem = async (data) => {
   try {
     const db = getDatabase(app);
     const newItemRef = push(ref(db, "food"));
-    await set(newItemRef, data);
+    const createdAt = new Date().toISOString();
+    await set(newItemRef, { ...data, createdAt });
     return newItemRef;
   } catch (e) {
     console.error("Error adding item: ", e);
