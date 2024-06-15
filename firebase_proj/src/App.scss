@@ -98,6 +98,11 @@ a {
   background-color: rgb(239 242 247 / var(--tw-bg-opacity));
 }
 
+.bg-primary {
+  --tw-bg-opacity: 1;
+  background-color: #4a00ff;
+}
+
 // PADDING & MARGIN
 .px-7\.5 {
   padding-left: 1.875rem;
