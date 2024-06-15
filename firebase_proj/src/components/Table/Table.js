@@ -37,11 +37,8 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 
 	return (
 		<div className="relative">
-			<div className="flex items-center mb-4">
-				<label htmlFor="default-search" className="sr-only">
-					Search
-				</label>
-				<div className="relative w-80">
+			<div className="flex flex-col md:flex-row items-center mb-4">
+				<div className="relative w-full md:w-80 mb-2 md:mb-0 md:mr-2">
 					<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 						<MagnifyingGlassIcon
 							aria-hidden="true"
@@ -57,7 +54,7 @@ const Table = ({ handleEdit, handleDelete, menuItems, loading }) => {
 						placeholder="Search"
 					/>
 				</div>
-				<div className="ml-auto">
+				<div className="flex items-center">
 					<label htmlFor="itemsPerPage" className="mr-2">
 						Items per page:
 					</label>
