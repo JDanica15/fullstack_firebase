@@ -29,6 +29,25 @@ export const readItems = async () => {
   }
 };
 
+//edit by id
+export const getSpecificItem = async (itemId) => {
+  try {
+    const db = getDatabase(app);
+    const snapshot = await get(ref(db, `food/${itemId}`));
+
+    if (snapshot.exists()) {
+      const item = { id: snapshot.key, ...snapshot.val() };
+      return item; // Return the specific item
+    } else {
+      console.log(`Item with ID ${itemId} not found`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error reading item: ", error);
+    throw error;
+  }
+};
+
 // Create a new item
 export const createItem = async (data) => {
   try {

@@ -1,210 +1,231 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { getSpecificItem, updateItem } from "../../config/utils/FireStoreServices";
+import FormInput from "../FormError/FormInput";
 
-const Edit = ({ item, onSave, onCancel }) => {
+const Edit = () => {
+    const navigate = useNavigate();
+    const { id } = useParams();
 
-    const [showOption, setShowOption] = useState(false);
     const [errors, setErrors] = useState({});
+    const [item, setItem] = useState(null);
     const [newItem, setNewItem] = useState({
         name: "",
         category: "",
-        price: 0,
-        cost: 0,
-        quantity: 0,
-        option: "",
+        price: "",
+        cost: "",
+        quantity: "",
+        option: [],
     });
 
+    const handleFetchError = useCallback((message, error) => {
+        console.error(message, error);
+        toast.error(message);
+        navigate("/app/menu");
+    }, [navigate]);
+
     useEffect(() => {
-        if (item) {
-            setNewItem(item);
-        }
-    }, [item]);
+        const fetchItem = async () => {
+            try {
+                const fetchedItem = await getSpecificItem(id);
+                if (fetchedItem) {
+                    setItem(fetchedItem);
+                    setNewItem({
+                        name: fetchedItem.name,
+                        category: fetchedItem.category,
+                        price: fetchedItem.price.toString(),
+                        cost: fetchedItem.cost.toString(),
+                        quantity: fetchedItem.quantity.toString(),
+                        option: fetchedItem.option || [],
+                    });
+                } else {
+                    handleFetchError("Item not found.");
+                }
+            } catch (error) {
+                handleFetchError("Failed to fetch item.", error);
+            }
+        };
+
+        fetchItem();
+    }, [id, handleFetchError]);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!newItem.name) newErrors.name = `Name is required ${toast.error('Name is required')}`;
-        if (!newItem.category) newErrors.category = `Category is required ${toast.error('Category is required')}`;
-        if (!newItem.price) newErrors.price = `Price is required ${toast.error('Price is required')}`;
-        if (!newItem.cost) newErrors.cost = `Cost is required ${toast.error('Cost is required')}`;
-        if (!newItem.quantity) newErrors.quantity = `Stock is required ${toast.error('Stock is required')}`;
+        if (!newItem.name) newErrors.name = "Name is required";
+        if (!newItem.category) newErrors.category = "Category is required";
+        if (!newItem.price) newErrors.price = "Price is required";
+        if (!newItem.cost) newErrors.cost = "Cost is required";
+        if (!newItem.quantity) newErrors.quantity = "Stock is required";
 
-        // CHECK PRICE COST QUANTITY
-        if(!/^\d*\.?\d*$/.test(newItem.price)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
-        if(!/^\d*\.?\d*$/.test(newItem.cost)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
-        if(!/^\d*\.?\d*$/.test(newItem.quantity)) newErrors.price = `Price must be valid number ${toast.error('Price must be valid number')}`;
-        return newErrors;
+        // Validate price, cost, and quantity as numbers
+        if (!/^\d*\.?\d*$/.test(newItem.price))
+            newErrors.price = "Price must be a valid number";
+        if (!/^\d*\.?\d*$/.test(newItem.cost))
+            newErrors.cost = "Cost must be a valid number";
+        if (!/^\d*\.?\d*$/.test(newItem.quantity))
+            newErrors.quantity = "Stock must be a valid number";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Return true if no errors
     };
 
     const handleEditSave = async () => {
         try {
-            const validationErrors = validateForm();
-            if (Object.keys(validationErrors).length > 0) {
-                setErrors(validationErrors);
-            } else {
-                const parseItem = {
+            if (validateForm()) {
+                const parsedItem = {
                     name: newItem.name,
                     category: newItem.category,
                     price: parseFloat(newItem.price),
                     cost: parseFloat(newItem.cost),
                     quantity: parseFloat(newItem.quantity),
-                    option: newItem.option
-                }
-                await onSave(parseItem);
-                toast.success('Data has been edited thanks!')
+                    option: newItem.option.filter(opt => opt.trim() !== ""),
+                };
+                await updateItem(id, parsedItem);
+                toast.success("Item updated successfully.");
+                navigate("/app/menu");
+            } else {
+                toast.error("Please fix the form errors.");
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error updating item: ", error);
+            toast.error("Failed to update item.");
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setNewItem({ ...newItem, [name]: value });
+        setNewItem(prevItem => ({
+            ...prevItem,
+            [name]: value,
+        }));
         if (errors[name]) {
-            setErrors({ ...errors, [name]: '' });
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                [name]: "",
+            }));
         }
     };
 
-    // OPTIONS
-    const handleOptionChange = (e) => {
-        setNewItem({ ...newItem, option: e.target.value });
+    const handleOptionChange = (index, value) => {
+        const updatedOptions = [...newItem.option];
+        updatedOptions[index] = value;
+        setNewItem(prevItem => ({
+            ...prevItem,
+            option: updatedOptions,
+        }));
     };
 
-    // FOR ERROR IF FIELD IS EMPTY
-    const getFieldClass = (fieldName) => {
-        return errors[fieldName] ?
-            'border-rose-600 focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-rose-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-rose-500 dark:focus:border-rose-600'
-            :
-            'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
+    const addOptionInput = () => {
+        setNewItem(prevItem => ({
+            ...prevItem,
+            option: [...prevItem.option, ""],
+        }));
     };
+
+    const removeOptionInput = (index) => {
+        const updatedOptions = newItem.option.filter((_, i) => i !== index);
+        setNewItem(prevItem => ({
+            ...prevItem,
+            option: updatedOptions,
+        }));
+    };
+
+    if (!item) {
+        return <p>Loading...</p>;
+    }
 
     return (
         <Fragment>
             <h2>Edit Item</h2>
             <div className="grid gap-6 mb-6 md:grid-cols-2">
+                <FormInput
+                    fieldName="category"
+                    label="Category"
+                    type="text"
+                    value={newItem.category}
+                    error={errors.category}
+                    onChange={handleChange}
+                    placeholder="Category"
+                />
+                <FormInput
+                    fieldName="name"
+                    label="Name"
+                    type="text"
+                    value={newItem.name}
+                    error={errors.name}
+                    onChange={handleChange}
+                    placeholder="Name"
+                />
                 <div>
                     <label
-                        htmlFor="category"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Category
-                    </label>
-                    <input
-                        className={`${getFieldClass('category')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-                        type="text"
-                        name="category"
-                        placeholder="Category"
-                        value={newItem.category}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label
-                        htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Name
-                    </label>
-                    <input
-                        className={`${getFieldClass('name')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-                        type="text"
-                        placeholder="Name"
-                        name="name"
-                        value={newItem.name}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label
-                        htmlFor="options"
+                        htmlFor="option"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
                         Option
                     </label>
-                    {item.option !== "" ? (
-                        <input
-                            className="mb-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            type="text"
-                            name="option"
-                            value={newItem.option}
-                            onChange={(e) => handleOptionChange(e)}
-                        />
-                    ) : (
-                        <Fragment>
-                            {
-                                showOption ?
-                                    <input
-                                        className="mb-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        type="text"
-                                        name="option"
-                                        value={newItem.option}
-                                        onChange={(e) => handleOptionChange(e)}
-                                    /> : ''
-                            }
+                    {newItem.option.map((option, index) => (
+                        <div className="flex items-center mb-2" key={index}>
+                            <input
+                                type="text"
+                                value={option}
+                                onChange={(e) => handleOptionChange(index, e.target.value)}
+                                placeholder="Option"
+                                className="bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5 mr-2"
+                            />
                             <button
-                                className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                                 type="button"
-                                onClick={() => setShowOption(!showOption)}
+                                onClick={() => removeOptionInput(index)}
+                                className="text-white bg-red-500 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 ml-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                             >
-                                Add Option
+                                Remove
                             </button>
-                        </Fragment>
-                    )}
+                        </div>
+                    ))}
+                    <div className="flex mb-2 mr-1">
+                        <button
+                            type="button"
+                            onClick={addOptionInput}
+                            className="text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
+                        >
+                            Add Option
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label
-                        htmlFor="price"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Price
-                    </label>
-                    <input
-                        className={`${getFieldClass('price')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
-                        type="text"
-                        name="price"
-                        placeholder="Price"
-                        value={newItem.price}
-                        onChange={handleChange}
-                    />
-                </div>
-
-                <div>
-                    <label
-                        htmlFor="quantity"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Stock
-                    </label>
-                    <input
-                        className={`${getFieldClass('quantity')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
-                        type="text"
-                        name="quantity"
-                        placeholder="Stock"
-                        value={newItem.quantity}
-                        onChange={handleChange}
-                    />
-                </div>
-
-                <div>
-                    <label
-                        htmlFor="Cost"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Cost
-                    </label>
-                    <input
-                        className={`${getFieldClass('cost')} bg-gray-50 border text-gray-900 text-sm rounded-lg block w-80 p-2.5`}
-                        type="text"
-                        name="cost"
-                        placeholder="Cost"
-                        value={newItem.cost}
-                        onChange={handleChange}
-                    />
-                </div>
+                <FormInput
+                    fieldName="price"
+                    label="Price"
+                    type="text"
+                    value={newItem.price}
+                    error={errors.price}
+                    onChange={handleChange}
+                    placeholder="Price"
+                />
+                <FormInput
+                    fieldName="quantity"
+                    label="Stock"
+                    type="text"
+                    value={newItem.quantity}
+                    error={errors.quantity}
+                    onChange={handleChange}
+                    placeholder="Stock"
+                />
+                <FormInput
+                    fieldName="cost"
+                    label="Cost"
+                    type="text"
+                    value={newItem.cost}
+                    error={errors.cost}
+                    onChange={handleChange}
+                    placeholder="Cost"
+                />
             </div>
-
-            <button className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={handleEditSave}>Save</button>
-            <button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" type="button" onClick={onCancel}>Cancel</button>
+            <button className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={handleEditSave}>
+                Save Changes
+            </button>
+            <Link to="/app/menu" className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                Cancel
+            </Link>
         </Fragment>
     );
 };

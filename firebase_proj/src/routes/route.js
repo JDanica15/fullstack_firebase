@@ -6,6 +6,7 @@ import { lazy } from 'react'
 const Dashboard = lazy(() => import('../components/Dashboard/index'))
 const Menu = lazy(() => import('../components/Menu/index'))
 const MenuCreate = lazy(() => import('../components/Menu/Create'))
+const EditPage = lazy(() => import('../components/Menu/Edit'))
 
 
 const routes = [
@@ -20,6 +21,10 @@ const routes = [
   {
     path: 'menu/create',
     component: MenuCreate
+  },
+  {
+    path: 'menu/edit/:id',
+    component: EditPage
   }
 ]
 
